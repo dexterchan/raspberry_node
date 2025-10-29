@@ -30,7 +30,7 @@ taint_condition="--node-taint run:NoSchedule"
 #     taint_condition="--node-taint node-role.kubernetes.io/control-plane:NoSchedule"
 # fi
 
-K3S_VERSION=v1.28.6+k3s2
+K3S_VERSION=v1.31.12+k3s1
 curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="$K3S_VERSION" sh -s - ${server_agent} \
                                 --token $SECRET \
                                 --server https://${server_ipaddress}:6443 \
