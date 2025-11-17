@@ -1,0 +1,5 @@
+global:
+  nodeSelector:
+    storage: longhorn
+defaultSettings:
+  systemManagedComponentsNodeSelector: "storage:longhorn"

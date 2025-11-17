@@ -8,19 +8,19 @@
 
 
 sudo apt-get install -y curl
-curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
-sudo apt-get install apt-transport-https --yes
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
+sudo apt-get install curl gpg apt-transport-https --yes
+curl -fsSL https://packages.buildkite.com/helm-linux/helm-debian/gpgkey | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
+echo "deb [signed-by=/usr/share/keyrings/helm.gpg] https://packages.buildkite.com/helm-linux/helm-debian/any/ any main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
 sudo apt-get update
 sudo apt-get install helm
 
 
-conn_str=$(sudo sh postgredb.connection_string.sh)
+
 SECRET=$(date +%s | sha256sum | base64 | head -c 32 )
 echo off
 echo $SECRET | sudo tee /boot/k3s_secret_token
 SECRET=$(cat /boot/k3s_secret_token)
-K3S_VERSION=v1.28.6+k3s2
+K3S_VERSION=v1.34.1+k3s1
 curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="$K3S_VERSION" K3S_KUBECONFIG_MODE="644"  sh -s - server --disable=traefik \
   --token=$SECRET  \
   -cluster-init 
@@ -41,9 +41,8 @@ k3s kubectl get node
 
 k3s_grp=k3s
 sudo groupadd --system   ${k3s_grp}
-sudo usermod -a -G ${k3s_grp} odroid
+sudo usermod -a -G ${k3s_grp} pi
 
-sudo usermod -a -G ${k3s_grp} droid
 sudo chgrp ${k3s_grp} /etc/rancher/k3s/k3s.yaml
 sudo chmod 660 /etc/rancher/k3s/k3s.yaml
 #Without this, you got Error: Kubernetes cluster unreachable
