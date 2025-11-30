@@ -1,6 +1,7 @@
 #!/bin/bash
-sudo apt update && sudo apt install open-iscsi -y
-sudo apt-get install nfs-common -y
+echo on each machine
+echo sudo apt update && sudo apt install open-iscsi -y
+echo sudo apt-get install nfs-common -y
 
 kubectl label nodes rasp-node1 rasp-node2 rasp-node3 storage=longhorn
 
