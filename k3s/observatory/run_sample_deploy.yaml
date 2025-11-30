@@ -1,0 +1,265 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: orderservice-dotnet
+    labels:
+        app: orderservice-dotnet
+        workload: dummy
+        demo: opentelemetry
+    namespace: monitoring
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: orderservice-dotnet
+            workload: dummy
+            demo: opentelemetry
+    template:
+        metadata:
+            labels:
+                app: orderservice-dotnet
+                workload: dummy
+                demo: opentelemetry
+        spec:
+            affinity:
+                nodeAffinity:
+                    requiredDuringSchedulingIgnoredDuringExecution:
+                        nodeSelectorTerms:
+                            - matchExpressions:
+                                  - key: workload
+                                    operator: In
+                                    values:
+                                        - dummy
+            tolerations:
+                - key: boar-cluster/compute-only
+                  operator: Exists
+                  effect: NoSchedule
+            containers:
+                - name: orderservice-dotnet-pod
+                  image: registry.example.com/orderservice-dotnet
+                  resources:
+                      limits:
+                          memory: "100Mi"
+                          cpu: "1"
+                      requests:
+                          memory: "20Mi"
+                          cpu: "0.1"
+                  env:
+                      - name: ASPNETCORE_ENVIRONMENT
+                        value: Production
+                  ports:
+                      - containerPort: 8080
+                        name: http
+                        protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: orderservice-svc
+    namespace: monitoring
+spec:
+    selector:
+        app: orderservice-dotnet
+        workload: dummy
+        demo: opentelemetry
+    ports:
+        - protocol: TCP
+          port: 8090
+          targetPort: 8080
+    type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+    name: orderservice-ingress
+    namespace: monitoring
+    annotations:
+        kubernetes.io/ingress.class: nginx
+        nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+    rules:
+        - host: observatory-demo.example.com
+          http:
+              paths:
+                  - path: /orderservice
+                    pathType: Prefix
+                    backend:
+                        service:
+                            name: orderservice-svc
+                            port:
+                                number: 8090
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: paymentservice-dotnet
+    labels:
+        app: paymentservice-dotnet
+        workload: dummy
+        demo: opentelemetry
+    namespace: monitoring
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: paymentservice-dotnet
+            workload: dummy
+            demo: opentelemetry
+    template:
+        metadata:
+            labels:
+                app: paymentservice-dotnet
+                workload: dummy
+                demo: opentelemetry
+        spec:
+            affinity:
+                nodeAffinity:
+                    requiredDuringSchedulingIgnoredDuringExecution:
+                        nodeSelectorTerms:
+                            - matchExpressions:
+                                  - key: workload
+                                    operator: In
+                                    values:
+                                        - dummy
+            tolerations:
+                - key: boar-cluster/compute-only
+                  operator: Exists
+                  effect: NoSchedule
+            containers:
+                - name: paymentservice-dotnet-pod
+                  image: registry.example.com/paymentservice-dotnet
+                  resources:
+                      limits:
+                          memory: "100Mi"
+                          cpu: "1"
+                      requests:
+                          memory: "20Mi"
+                          cpu: "0.1"
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: paymentservice
+    namespace: monitoring
+spec:
+    selector:
+        app: paymentservice-dotnet
+        workload: dummy
+        demo: opentelemetry
+    ports:
+        - protocol: TCP
+          port: 8080
+          targetPort: 8080
+    type: ClusterIP
+---
+# run a deploy to one replica of image registry.example.com/shoehubv2
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: shoehubv2
+    labels:
+        app: shoehubv2
+        workload: dummy
+    namespace: monitoring
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: shoehubv2
+            workload: dummy
+    template:
+        metadata:
+            labels:
+                app: shoehubv2
+                workload: dummy
+        spec:
+            # only run with node of label workload=dummy as affinity
+            affinity:
+                nodeAffinity:
+                    requiredDuringSchedulingIgnoredDuringExecution:
+                        nodeSelectorTerms:
+                            - matchExpressions:
+                                  - key: workload
+                                    operator: In
+                                    values:
+                                        - dummy
+            # tolerate taint boar-cluster/compute-only
+            tolerations:
+                - key: boar-cluster/compute-only
+                  operator: Exists
+                  effect: NoSchedule
+            containers:
+                - name: shoehubv2-pod
+                  image: registry.example.com/shoehubv2:latest
+                  resources:
+                      limits:
+                          memory: "100Mi"
+                          cpu: "1"
+                      requests:
+                          memory: "20Mi"
+                          cpu: "0.1"
+                  ports:
+                      - containerPort: 8080
+---
+# expose deploy/shoehubv2 as clusterIP with port 8080
+apiVersion: v1
+kind: Service
+metadata:
+    name: shoehubv2
+    namespace: monitoring
+spec:
+    selector:
+        app: shoehubv2
+        workload: dummy
+    ports:
+        - protocol: TCP
+          port: 8080
+          targetPort: 8080
+    type: ClusterIP
+---
+# run deploy with image registry.example.com/loki-demo
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: loki-demo
+    labels:
+        app: loki-demo
+        workload: dummy
+    namespace: monitoring
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: loki-demo
+            workload: dummy
+    template:
+        metadata:
+            labels:
+                app: loki-demo
+                workload: dummy
+        spec:
+            # only run with node of label workload=dummy as affinity
+            affinity:
+                nodeAffinity:
+                    requiredDuringSchedulingIgnoredDuringExecution:
+                        nodeSelectorTerms:
+                            - matchExpressions:
+                                  - key: workload
+                                    operator: In
+                                    values:
+                                        - dummy
+            # tolerate taint boar-cluster/compute-only
+            tolerations:
+                - key: boar-cluster/compute-only
+                  operator: Exists
+                  effect: NoSchedule
+            containers:
+                - name: loki-demo-pod
+                  image: registry.example.com/loki-demo:latest
+                  resources:
+                      limits:
+                          memory: "20Mi"
+                          cpu: "1"
+                      requests:
+                          memory: "20Mi"
+                          cpu: "0.1"

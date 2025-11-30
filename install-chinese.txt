@@ -1,0 +1,7 @@
+
+#https://liujiaje.com/resources/20100716_notes/20160105_notes03/tbNotes_locate_20160106.php?iId_htm=1695801821
+terminal
+sudo apt-get install fcitx
+sudo apt-get install fcitx-table-cangjie5 fcitx-table-quick5
+sudo apt-get install scim scim-tables-zh
+reboot

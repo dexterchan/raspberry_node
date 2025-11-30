@@ -1,0 +1,8 @@
+global:
+  nodeSelector:
+    storage: longhorn
+defaultSettings:
+  systemManagedComponentsNodeSelector: "storage:longhorn"
+  #in Raspberry Pi cluster, due to less performance, so we need to adjust some settings
+  backingImageRecoveryWaitInterval: 600
+  default-replica-count: 2

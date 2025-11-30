@@ -24,7 +24,7 @@ EOF
 sudo apt-get update -y
 sudo apt-get upgrade -y
 
-sudo apt install -y avahi-daemon curl
+sudo apt install -y avahi-daemon curl open-iscsi
 sh ./install_swap_drive.sh
 cd /tmp
 echo 'alias temp="vcgencmd measure_temp"' >> ~/.bashrc 
@@ -35,12 +35,14 @@ APPUSER=droid
 HOMEDIR=/home/${APPUSER}
 sudo mkdir -p ${HOMEDIR}
 sudo groupadd --system --gid=9999  ${APPUSER} 
-sudo useradd --system --home-dir $HOMEDIR --uid=9999 --gid=${APPUSER} ${APPUSER}
+sudo chown 9999:9999 /home/${APPUSER}
+sudo adduser  --home-dir $HOMEDIR --uid=9999 --gid=${APPUSER} ${APPUSER}
 echo "${APPUSER} ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
 
 sudo update-alternatives --set iptables  /usr/sbin/iptables-nft
 echo "Reboot and allow below commands:"
 
+#sudo ufw allow 22
 # echo sudo ufw --force default deny incoming
-# echo sudo ufw allow from 192.168.1.0/24 proto tcp to any port 22
+# echo sudo ufw allow from 192.168.50.0/24 proto tcp to any port 22
 # echo sudo ufw --force enable 

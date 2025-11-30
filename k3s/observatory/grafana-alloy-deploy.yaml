@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: grafana-alloy
+    namespace: monitoring
+    labels:
+        app: grafana-alloy
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: grafana-alloy
+    template:
+        metadata:
+            labels:
+                app: grafana-alloy
+        spec:
+            containers:
+                - name: grafana-alloy
+                  image: grafana/alloy:latest
+                  args:
+                      - "run"
+                      - "--server.http.listen-addr=0.0.0.0:12345"
+                      - "--storage.path=/var/lib/alloy/data"
+                      - "/etc/alloy/config.alloy"
+                  ports:
+                      - containerPort: 12345
+                        name: http
+                      - containerPort: 4318
+                        name: port-4318
+                      - containerPort: 4320
+                        name: port-4320
+                  volumeMounts:
+                      - name: grafana-alloy-volume
+                        mountPath: /etc/alloy/config.alloy
+                        subPath: config.alloy
+            volumes:
+                - name: grafana-storage
+                  emptyDir: {}
+                - name: grafana-alloy-volume
+                  configMap:
+                      defaultMode: 420
+                      name: grafana-alloy-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: alloy
+    namespace: monitoring
+spec:
+    selector:
+        app: grafana-alloy
+    ports:
+        - port: 4318
+          targetPort: 4318
+          name: port-4318
+        - port: 4320
+          targetPort: 4320
+          name: port-4320

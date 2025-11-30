@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: backtest-crypto
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: docker-registry
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: backtest-crypto
+  name: backtest-config
+data:
+  # property-like keys; each key maps to a simple value
+  PYTHONPATH: /var/task
+  disk-mount-dir: /var/task/data
+  WORKSPACE_DIR: /var/task/data/workspaces
+  RUN_CONFIG: /var/task/configuration/RunConfig.json
+  SPARK_STRATEGY_LIVE_SCHEDULE_JOB_TEMPLATE: /var/task/live-schedule-job/run_spark_k8s_live_templ.yaml
+  CALCULATION_LOGDATA_DIR: /var/task/data/calc_log_data #to be absorbed into RunConfig.yaml setting
+  NUM_OF_SPARK_PROCESSES: "1"
+  smb-data-dir: //192.168.1.1/T_Drive/crypto_data
