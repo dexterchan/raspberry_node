@@ -1,0 +1,25 @@
+#Generate a config kube containing bash script
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: backtest-crypto
+  name: backup-mktdata-script
+data:
+  backup_mkt_data_aws_s3.sh: |
+    #!/bin/sh
+    cd /var/task/data
+
+    # use aws s3 sync to sync folders:
+    #- kraken.ETHUSD
+    #- kraken.XBTUSD
+    #- kraken.XDGUSD
+    # to s3://boar-tradingbot/marketdata_complete
+
+    # Sync ETHUSD data
+    aws s3 sync kraken.ETHUSD s3://boar-tradingbot/marketdata_complete/kraken.ETHUSD
+
+    # Sync XBTUSD data
+    aws s3 sync kraken.XBTUSD s3://boar-tradingbot/marketdata_complete/kraken.XBTUSD
+
+    # Sync XDGUSD data
+    aws s3 sync kraken.XDGUSD s3://boar-tradingbot/marketdata_complete/kraken.XDGUSD
