@@ -14,13 +14,13 @@ install-prometheus:
 install-loki:
 	./grafana-loki-helm.sh
 
-install-tempo:
-	kubectl apply -f grafana-tempo-config.yaml
-	kubectl apply -f grafana-tempo-deploy.yaml
+# install-tempo:
+# 	kubectl apply -f grafana-tempo-config.yaml
+# 	kubectl apply -f grafana-tempo-deploy.yaml
 
-install-alloy:
-	kubectl apply -f grafana-alloy-config.yaml
-	kubectl apply -f grafana-alloy-deploy.yaml
+# install-alloy:
+# 	kubectl apply -f grafana-alloy-config.yaml
+# 	kubectl apply -f grafana-alloy-deploy.yaml
 
 install-grafana:
 	kubectl apply -f grafana-install.yaml
