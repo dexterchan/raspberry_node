@@ -1,4 +1,5 @@
 loki:
+  auth_enabled: false
   commonConfig:
     replication_factor: 1
   schemaConfig:
@@ -15,13 +16,25 @@ loki:
   limits_config:
     allow_structured_metadata: true
     volume_enabled: true
+  storage:
+    type: s3
+    bucketNames:
+      chunks: chunks
+      ruler: ruler
+      admin: admin
+    s3:
+      endpoint: http://loki-minio.monitoring.svc:9000
+      secretAccessKey: supersecret
+      accessKeyId: loki
+      s3ForcePathStyle: true
+      insecure: true
   ruler:
     enable_api: true
-  auth_enabled: false #For test only
-
 
 minio:
   enabled: true
+  accessKey: loki
+  secretKey: supersecret
       
 deploymentMode: SingleBinary
 

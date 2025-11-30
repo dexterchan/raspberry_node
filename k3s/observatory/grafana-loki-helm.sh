@@ -10,4 +10,4 @@ helm repo update
 helm install loki grafana/loki -n monitoring --wait \
          -f loki-values.yaml
 
-kubectl apply -f grafana-promtail-install.yaml
+#kubectl apply -f grafana-promtail-install.yaml
