@@ -1,0 +1,117 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: memcached
+    namespace: monitoring
+spec:
+    selector:
+        matchLabels:
+            app: memcached
+            components: grafana-tempo
+    replicas: 1
+    template:
+        metadata:
+            labels:
+                app: memcached
+                components: grafana-tempo
+        spec:
+            containers:
+                - name: memcached
+                  image: memcached:1.6.29
+                  ports:
+                      - containerPort: 11211
+                  env:
+                      - name: MEMCACHED_MAX_MEMORY
+                        value: 64m
+                      - name: MEMCACHED_THREADS
+                        value: "4"
+                  resources:
+                      requests:
+                          cpu: 100m
+                          memory: 64Mi
+                      limits:
+                          cpu: 200m
+                          memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: memcached
+    namespace: monitoring
+spec:
+    selector:
+        app: memcached
+        components: grafana-tempo
+    ports:
+        - port: 11211
+          targetPort: 11211
+    type: ClusterIP
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: tempo
+    namespace: monitoring
+spec:
+    selector:
+        matchLabels:
+            app: tempo
+            components: grafana-tempo
+    replicas: 1
+    template:
+        metadata:
+            labels:
+                app: tempo
+                components: grafana-tempo
+        spec:
+            containers:
+                - name: tempo
+                  image: grafana/tempo:latest
+                  ports:
+                      - containerPort: 3200
+                        name: http
+                      - containerPort: 4317
+                        name: otlp-grpc
+                      - containerPort: 4318
+                        name: otlp-http
+                  resources:
+                      requests:
+                          cpu: 100m
+                          memory: 128Mi
+                      limits:
+                          cpu: 500m
+                          memory: 512Mi
+                  args:
+                      - "-config.file=/etc/tempo.yaml"
+                  volumeMounts:
+                      - name: grafana-tempo-config-volume
+                        mountPath: /etc/tempo.yaml
+                        subPath: tempo.yaml
+                        readOnly: true
+            volumes:
+                - name: grafana-tempo-config-volume
+                  configMap:
+                      name: grafana-tempo-config
+                      defaultMode: 420
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: tempo
+    namespace: monitoring
+spec:
+    selector:
+        app: tempo
+        components: grafana-tempo
+    ports:
+        - port: 3200
+          name: http
+          targetPort: 3200
+        - port: 4317
+          name: otlp-grpc
+          targetPort: 4317
+        - port: 4318
+          name: otlp-http
+          targetPort: 4318
+    type: ClusterIP
